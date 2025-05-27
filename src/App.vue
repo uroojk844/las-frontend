@@ -1,7 +1,7 @@
 <script setup></script>
 
 <template>
-  <h1>Hello</h1>
+  <h1>School Management Frontend</h1>
 </template>
 
 <style></style>
