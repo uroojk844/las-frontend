@@ -1,22 +1,19 @@
 <script setup lang="ts">
 import { RouterView } from "vue-router";
-import useUserStore from "./store/user.js";
-import Sidebar from "./components/Sidebar.vue";
-import { storeToRefs } from "pinia";
+import Sidebar from "@/components/Sidebar.vue";
+import NavBar from "@/components/NavBar.vue";
+import { provide, ref } from "vue";
+const isSidebarOpen = ref(false);
 
-const userStore = useUserStore();
-const { getUser } = storeToRefs(userStore);
+provide("isSidebarOpen", isSidebarOpen);
 </script>
 
 <template>
   <section class="flex w-full h-screen">
     <Sidebar />
     <section class="flex-1 flex flex-col">
-      <nav class="w-full flex justify-between items-center p-4 bg-slate-950 text-white">
-        <h1>Hello, {{ getUser?.name }}</h1>
-        <button @click="userStore.logout()">Logout</button>
-      </nav>
-      <main class="h-full overflow-y-auto">
+      <NavBar />
+      <main class="h-full overflow-y-auto p-4">
         <RouterView />
       </main>
     </section>

@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
-import Auth from "./pages/Auth/Auth.vue";
-import Login from "./pages/Auth/Login.vue";
-import useUserStore from "./store/user.js";
+import Auth from "@/pages/Auth/Auth.vue";
+import Login from "@/pages/Auth/Login.vue";
+import useUserStore from "@/store/user.js";
 
 export const router = createRouter({
     routes: [
@@ -18,24 +18,24 @@ export const router = createRouter({
                 {
                     path: "register",
                     name: "Register",
-                    component: () => import("./pages/Auth/Register.vue")
+                    component: () => import("@/pages/Auth/Register.vue")
                 }
             ]
         },
         {
             path: "/",
             name: "Layout",
-            component: () => import("./Layout.vue"),
+            component: () => import("@/Layout.vue"),
             children: [
                 {
                     path: "",
                     name: "Dashboard",
-                    component: () => import("./pages/Dashboard.vue")
+                    component: () => import("@/pages/Dashboard.vue")
                 },
                 {
                     path: "students",
                     name: "Students",
-                    component: () => import("./pages/Students.vue")
+                    component: () => import("@/pages/Students.vue")
                 }
             ]
         },

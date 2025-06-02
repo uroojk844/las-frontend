@@ -2,5 +2,5 @@
 </script>
 
 <template>
-  <h1>Students</h1>
+  <h1>All Students</h1>
 </template>
