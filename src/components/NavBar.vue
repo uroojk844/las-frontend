@@ -13,8 +13,8 @@ const isSidebarOpen = inject("isSidebarOpen");
                 <Icon icon="gravity-ui:bars" class="text-xl text-accent" />
             </button>
 
-            <form class="max-sm:hidden flex items-center bg-secondary/50 h-8 rounded overflow-hidden max-w-xs flex-1">
-                <input type="search" placeholder="Search" class="h-full p-2 flex-1" />
+            <form class="max-sm:hidden flex items-center bg-background h-8 rounded overflow-hidden max-w-xs w-full">
+                <input type="search" placeholder="Search" class="h-full p-2 w-full" />
                 <button class="px-2 text-accent">
                     <Icon icon="ph:magnifying-glass-bold" />
                 </button>

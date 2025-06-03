@@ -1,36 +1,28 @@
 import { defineStore } from "pinia";
-import { router } from "../router";
+import { auth } from "@/firebase";
+import { signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 
 const useUserStore = defineStore("user", {
     state: () => ({
-        user: localStorage.getItem("isAuthenticated") ? {
-            id: '12345',
-            name: 'John Doe',
-            email: 'john.doe@example.com',
-        } : null,
+        user: null,
         token: null,
-        isAuthenticated: localStorage.getItem("isAuthenticated") || false,
         isLoading: false,
     }),
     getters: {
         getUser: (state) => state.user,
         getToken: (state) => state.token,
-        getIsAuthenticated: (state) => state.isAuthenticated,
         getIsLoading: (state) => state.isLoading,
     },
     actions: {
         setUser(user) {
             this.user = user;
         },
-        login() {
-            this.user = {
-                id: '12345',
-                name: 'John Doe',
-                email: 'john.doe@example.com',
-            };
-            this.isAuthenticated = true;
-            localStorage.setItem("isAuthenticated", "true");
-            router.push({ name: "Dashboard" });
+        async googleLogin() {
+            await signInWithPopup(auth, new GoogleAuthProvider())
+        },
+        async register() {
+            // const user = await createUserWithEmailAndPassword(auth, "admin@lasms.com", "admin123");
+            // await signInWithEmailAndPassword(auth,)
         },
         setToken(token) {
             this.token = token;
@@ -38,12 +30,8 @@ const useUserStore = defineStore("user", {
         setLoading(loading) {
             this.isLoading = loading;
         },
-        logout() {
-            this.user = null;
-            this.token = null;
-            this.isAuthenticated = false;
-            localStorage.removeItem("isAuthenticated");
-            router.push({ name: "Login" });
+        async logout() {
+            await auth.signOut();
         },
     },
 });

@@ -35,7 +35,24 @@ export const router = createRouter({
                 {
                     path: "students",
                     name: "Students",
-                    component: () => import("@/pages/Students.vue")
+                    component: () => import("@/pages/Student/StudentView.vue"),
+                    children: [
+                        {
+                            path: "",
+                            name: "AllStudents",
+                            component: () => import("@/pages/Student/All.vue"),
+                        },
+                        {
+                            path: "view/:id",
+                            name: "ViewStudent",
+                            component: () => import("@/pages/Student/View.vue"),
+                        },
+                        {
+                            path: "add",
+                            name: "AddStudent",
+                            component: () => import("@/pages/Student/Add.vue"),
+                        }
+                    ],
                 }
             ]
         },
@@ -52,7 +69,7 @@ const isAuthPage = (route) => {
 
 const isAuthenticated = () => {
     const userStore = useUserStore();
-    return userStore.getIsAuthenticated;
+    return !!userStore.getUser;
 }
 
 router.beforeEach((to, from, next) => {

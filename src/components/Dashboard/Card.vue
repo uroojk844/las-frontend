@@ -17,7 +17,7 @@ const { data } = defineProps(['data']);
 @reference "@/style.css";
 
 .card {
-    @apply bg-white p-4 flex justify-between items-center min-w-40 rounded-lg border border-gray-200;
+    @apply bg-white hover:bg-secondary cursor-pointer transition-colors p-4 flex justify-between items-center min-w-40 rounded-lg border border-gray-200;
 
     .label {
         @apply text-light-gray text-sm mb-1;

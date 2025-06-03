@@ -3,9 +3,9 @@ import Card from '../components/Dashboard/Card.vue';
 
 const dashboardData = [
   { label: 'Students', value: 1500, icon: 'ph:student-fill' },
-  { label: 'Courses', value: 30, icon: 'ph:book-open-fill' },
-  { label: 'Instructors', value: 10, icon: 'ph:user-check-fill' },
-  { label: 'Reviews', value: 250, icon: 'ph:star-fill' }
+  { label: 'Instructors', value: 10, icon: 'mdi:google-classroom' },
+  { label: 'Drivers', value: 6, icon: 'mdi:bus-school' },
+  { label: 'Other staffs', value: 5, icon: 'ph:users-three-fill' },
 ];
 </script>
 
