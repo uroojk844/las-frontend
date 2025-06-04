@@ -1,38 +1,77 @@
 <script setup lang="ts">
-import { inject } from "vue";
+import { computed, inject } from "vue";
 import { RouterLink } from "vue-router";
+import useUserStore from "@/store/user";
 
 const sidebarLinks = [
   { name: "Dashboard", icon: "material-symbols:space-dashboard-rounded", path: "/" },
   {
-    name: "Students", icon: "material-symbols:group-rounded", path: "/students",
+    name: "Student", icon: "ph:student-fill",
     children: [
-      { name: "All Students", path: "/students" },
-      { name: "Add Student", path: "/students/add" },
+      { name: "All Students", path: "/student" },
+      {
+        name: "Add Student", path: "/student/add",
+        permission: ["admin"]
+      },
+    ]
+  },
+  {
+    name: "Admin", icon: "material-symbols:admin-panel-settings-rounded",
+    permission: ["admin"],
+    children: [
+      { name: "All users", path: "/admin" },
+      { name: "Create user", path: "/admin/create" },
     ]
   },
 ];
 
 const isSidebarOpen = inject("isSidebarOpen");
+
+const userStore = useUserStore();
+
+const isAllowedLinks = computed(() => {
+  const userRole = userStore.user?.role;
+  return sidebarLinks
+    .map(link => {
+      // Check parent permission
+      if (link.permission && !link.permission.includes(userRole)) return false;
+
+      // If has children, filter children by permission
+      if (link.children) {
+        const allowedChildren = link.children.filter(child => {
+          if (!child.permission) return true;
+          return child.permission.includes(userRole);
+        });
+        // Only return parent if it has allowed children
+        if (allowedChildren.length > 0) {
+          return { ...link, children: allowedChildren };
+        }
+        return false;
+      }
+
+      return link;
+    })
+    .filter(Boolean);
+});
 </script>
 
 <template>
   <aside :class="{ open: isSidebarOpen }" class="w-64 h-full p-4 bg-white border-r border-gray-200 transition-all ">
     <div class="text-2xl font-bold mb-2 text-accent">LASMS</div>
 
-    <div v-for="(item, index) in sidebarLinks" :key="index">
-      <details v-if="item?.children" class="[&[open]>summary]:text-accent">
+    <div v-for="(item, index) in isAllowedLinks" :key="index">
+      <details v-if="item?.children" class="group [&:has(.router-link-exact-active)>summary]:text-accent">
         <summary
-          class="flex items-center gap-2 p-2 rounded text-[#8b8b8b] hover:text-accent cursor-pointer transition-colors mb-2">
-          <icon :icon="item.icon" class="text-xl" /> {{ item.name }}
+          class="flex items-center gap-2 p-2 rounded text-[#8b8b8b] hover:text-accent cursor-pointer transition-colors">
+          <icon :icon="item.icon" class="size-6" /> {{ item.name }}
           <span class="ml-auto">
-            <icon icon="tabler:chevron-down" class="text-xl" />
+            <icon icon="tabler:chevron-down" class="text-xl -rotate-90 group-open:rotate-0 transition-transform" />
           </span>
         </summary>
 
-        <div class="border-l-2 border-secondary ml-4">
+        <div class="border-l-2 border-secondary ml-4 space-y-2">
           <RouterLink :to="child.path" v-for="(child, index) in item.children" :key="index"
-            class="child-link ml-4 flex items-center gap-2 p-2 rounded hover:bg-secondary text-[#8b8b8b] hover:text-accent transition-colors mb-2">
+            class="child-link ml-4 flex items-center gap-2 p-2 rounded hover:bg-secondary text-[#8b8b8b] hover:text-accent transition-colors">
             {{ child.name }}
           </RouterLink>
         </div>
@@ -40,7 +79,7 @@ const isSidebarOpen = inject("isSidebarOpen");
 
       <RouterLink v-else :to="item.path"
         class="flex items-center gap-2 p-2 rounded hover:bg-secondary text-[#8b8b8b] hover:text-accent transition-colors">
-        <icon :icon="item.icon" class="text-xl" />
+        <icon :icon="item.icon" class="size-6" />
         {{ item.name }}
       </RouterLink>
     </div>

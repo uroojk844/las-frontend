@@ -1,0 +1,42 @@
+[
+    {
+        "name": "John Doe",
+        "id": "12345",
+        "role": "Admin",
+        "dob": "2005-05-15",
+        "mobile": "123-456-7890",
+        "address": "123 Main St, City, Country"
+    },
+    {
+        "name": "Jane Smith",
+        "id": "67890",
+        "role": "User",
+        "dob": "2004-08-20",
+        "mobile": "987-654-3210",
+        "address": "456 Elm St, City, Country"
+    },
+    {
+        "name": "Alice Johnson",
+        "id": "11223",
+        "role": "User",
+        "dob": "2003-02-10",
+        "mobile": "555-123-4567",
+        "address": "789 Oak St, City, Country"
+    },
+    {
+        "name": "Bob Brown",
+        "id": "44556",
+        "role": "Admin",
+        "dob": "2005-11-30",
+        "mobile": "444-555-6666",
+        "address": "321 Pine St, City, Country"
+    },
+    {
+        "name": "Charlie White",
+        "id": "77889",
+        "role": "User",
+        "dob": "2004-07-25",
+        "mobile": "333-222-1111",
+        "address": "654 Maple St, City, Country"
+    }
+]

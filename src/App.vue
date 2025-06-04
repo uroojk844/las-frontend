@@ -7,13 +7,18 @@ import { router } from "./router";
 
 const userStore = useUserStore();
 
-onAuthStateChanged(auth, (user) => {
+onAuthStateChanged(auth, async (user) => {
   if (user) {
     userStore.setUser({
-      uid: user.uid,
       email: user.email,
       name: user.displayName,
       photo: user.photoURL,
+    });
+    const res = await fetch(`https://lasms.proficiosoftware.com/?email=${userStore.getUser.email}`)
+    const data = await res.json();
+    userStore.setUser({
+      ...userStore.getUser,
+      role: data.role,
     });
     router.push("/");
   } else {

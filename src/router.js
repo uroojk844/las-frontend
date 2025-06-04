@@ -33,8 +33,8 @@ export const router = createRouter({
                     component: () => import("@/pages/Dashboard.vue")
                 },
                 {
-                    path: "students",
-                    name: "Students",
+                    path: "student",
+                    name: "Student",
                     component: () => import("@/pages/Student/StudentView.vue"),
                     children: [
                         {
@@ -50,8 +50,32 @@ export const router = createRouter({
                         {
                             path: "add",
                             name: "AddStudent",
+                            meta: { permission: ["admin"] },
                             component: () => import("@/pages/Student/Add.vue"),
                         }
+                    ],
+                },
+                {
+                    path: "admin",
+                    name: "Admin",
+                    meta: { permission: ["admin"] },
+                    component: () => import("@/pages/Admin/AdminView.vue"),
+                    children: [
+                        {
+                            path: "",
+                            name: "AllAdmins",
+                            component: () => import("@/pages/Admin/All.vue"),
+                        },
+                        {
+                            path: "view/:id",
+                            name: "ViewAdmin",
+                            component: () => import("@/pages/Admin/View.vue"),
+                        },
+                        {
+                            path: "create",
+                            name: "CreateAdmin",
+                            component: () => import("@/pages/Admin/Create.vue"),
+                        },
                     ],
                 }
             ]
@@ -72,8 +96,14 @@ const isAuthenticated = () => {
     return !!userStore.getUser;
 }
 
+const isAdmin = () => {
+    const userStore = useUserStore();
+    return userStore.getUser?.role === 'admin';
+}
+
 router.beforeEach((to, from, next) => {
     if (!isAuthenticated() && !isAuthPage(to)) next({ name: 'Login' })
     else if (isAuthPage(to) && isAuthenticated()) next({ name: 'Dashboard' })
+    else if (to.meta.permission && !to.meta.permission.includes(isAdmin()) && !isAdmin() && isAuthenticated()) next({ name: 'Dashboard' })
     else next();
 })
