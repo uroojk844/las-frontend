@@ -1,28 +1,39 @@
 <script setup>
 import FilledButton from '@/components/FilledButton.vue';
+import MainHeader from '@/components/MainHeader.vue';
 import { RouterLink } from 'vue-router';
-import students from '@/assets/students.json';
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import useUserStore from "@/store/user";
+import { useStudentsStore } from "@/store/students";
+import { storeToRefs } from 'pinia';
 
+const URL = import.meta.env.API_URL || "https://lasms.proficiosoftware.com";
+
+const studentsStore = useStudentsStore();
+const { getStudents } = storeToRefs(studentsStore);
 const filter = ref('');
 
-const filteredStudents = computed(() => students.filter(student => {
-    return student.name.toLowerCase().includes(filter.value.toLowerCase()) ||
-        student.roll.toString().includes(filter.value);
+const filteredStudents = computed(() => getStudents.value.filter(student => {
+    let fullname = `${student.firstName} ${student.middleName} ${student.lastName}`;
+    return fullname.toLowerCase().includes(filter.value.toLowerCase()) ||
+        student?.roll?.toString().includes(filter.value);
 }));
+
 const userStore = useUserStore();
+
+onMounted(() => {
+    studentsStore.fetchStudents();
+})
 </script>
 
 <template>
-    <section class="flex justify-between items-center mb-4">
-        <h1 class="text-2xl font-bold">Students List</h1>
+    <MainHeader title="Students List">
         <RouterLink to="/student/add">
             <FilledButton v-if="userStore.getIsAdmin">
                 <icon icon="ph:plus-bold" /> Add Student
             </FilledButton>
         </RouterLink>
-    </section>
+    </MainHeader>
 
     <section class="grid bg-white p-4 rounded-md">
         <div class="flex items-center mb-4">
@@ -49,16 +60,16 @@ const userStore = useUserStore();
                 <tbody>
                     <tr v-for="(student, index) in filteredStudents" :key="index"
                         class="hover:bg-background cursor-pointer"
-                        @click="() => $router.push('/student/view/' + student.roll)" title="Click to view details">
+                        @click="() => $router.push('/student/view/' + student.id)" title="Click to view details">
                         <td class="flex items-center gap-2 cursor-pointer">
-                            <img class="size-8 rounded-full" :src="'https://picsum.photos/30.webp?random=' + index"
+                            <img class="size-8 rounded-full" :src="`${URL}/documents/${student.id}/${student?.photo}`"
                                 :alt="student.name">
-                            {{ student.name }}
+                            {{ student.firstName }} {{ student.middleName }} {{ student.lastName }}
                         </td>
                         <td>{{ student.roll }}</td>
-                        <td>{{ student.class }}</td>
+                        <td>{{ student.joiningClass }}</td>
                         <td>{{ student.dob }}</td>
-                        <td>{{ student.mobile }}</td>
+                        <td>{{ student.phone }}</td>
                         <td>{{ student.address }}</td>
                     </tr>
                 </tbody>

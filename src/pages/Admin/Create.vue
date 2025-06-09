@@ -3,6 +3,7 @@ import FilledButton from '@/components/FilledButton.vue';
 import useUserStore from '@/store/user';
 import { storeToRefs } from 'pinia';
 import { computed, ref } from 'vue';
+import MainHeader from '@/components/MainHeader.vue';
 const userStore = useUserStore();
 const { getIsLoading } = storeToRefs(userStore);
 
@@ -14,10 +15,7 @@ const user = ref({
 const isMatching = computed(() => user.value.password === user.value.cpassword);
 </script>
 <template>
-    <section class="flex justify-between items-center mb-4">
-        <h1 class="text-2xl font-bold">Create admin</h1>
-    </section>
-
+    <MainHeader title="Create admin" />
 
     <section class="grid bg-white p-4 rounded-md">
         <form @submit.prevent="userStore.createAdmin" class="space-y-4">

@@ -1,7 +1,8 @@
-<script setup lang="ts">
-import { computed, inject } from "vue";
+<script setup>
+import { computed, inject, ref } from "vue";
 import { RouterLink } from "vue-router";
 import useUserStore from "@/store/user";
+import { handleClickedOutside } from "../utils/handleClickOutside";
 
 const sidebarLinks = [
   { name: "Dashboard", icon: "material-symbols:space-dashboard-rounded", path: "/" },
@@ -25,7 +26,10 @@ const sidebarLinks = [
   },
 ];
 
+const sidebar = ref(null);
 const isSidebarOpen = inject("isSidebarOpen");
+
+handleClickedOutside(sidebar, isSidebarOpen);
 
 const userStore = useUserStore();
 
@@ -56,7 +60,8 @@ const isAllowedLinks = computed(() => {
 </script>
 
 <template>
-  <aside :class="{ open: isSidebarOpen }" class="w-64 h-full p-4 bg-white border-r border-gray-200 transition-all ">
+  <aside :class="{ open: isSidebarOpen }" ref="sidebar"
+    class="w-64 h-full p-4 bg-white border-r border-gray-200 transition-all ">
     <div class="text-2xl font-bold mb-2 text-accent">LASMS</div>
 
     <div v-for="(item, index) in isAllowedLinks" :key="index">
