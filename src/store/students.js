@@ -1,7 +1,9 @@
 import { defineStore } from "pinia";
 import { useAlertStore } from "@/store/Alert";
+import { getFormData } from "@/utils/getFormData";
+import { axiosInstance } from "@/utils/api";
 
-const alertStore = useAlertStore()
+const alertStore = useAlertStore();
 
 const previousSchoolTemplate = {
     "class": '',
@@ -12,27 +14,52 @@ const previousSchoolTemplate = {
 
 export const useStudentsStore = defineStore("studentsStore", {
     state: () => ({
+        isLoadingClassList: false,
+        classList: [],
+        studentEnrollment: null,
+        student: [],
+        isLoadingStudent: false,
         students: [],
         isLoadingStudents: false,
         previousSchool: [{ ...previousSchoolTemplate }],
         isUpdatingDetails: false,
+        isSearching: false,
     }),
     getters: {
+        getIsLoadingClassList: (state) => state.isLoadingClassList,
+        getClassList: (state) => state.classList,
+        classListOption: (state) => state.classList.map((cl) => {
+            return { label: cl.name, value: cl.id }
+        }),
+        getStudentEnrolloment: (state) => state.studentEnrollment,
+        getStudent: (state) => state.student,
         getStudents: (state) => state.students,
+        getIsLoadingStudent: (state) => state.isLoading,
         getIsLoadingUsers: (state) => state.isLoading,
         getPreviousSchool: (state) => state.previousSchool,
         getIsUpdatingDetails: (state) => state.isUpdatingDetails,
+        getIsSearching: (state) => state.isSearching,
     },
     actions: {
+        async fetchClassList() {
+            try {
+                this.isLoadingClassList = true;
+                const { data } = await axiosInstance.get('/student/classList/');
+                this.classList = data?.success;
+            } catch (error) {
+                alertStore.showAppAlert(error, 'error');
+            } finally {
+                this.isLoadingClassList = false;
+            }
+        },
         async fetchStudents() {
             this.isLoadingStudents = true;
-            const response = await fetch('https://lasms.proficiosoftware.com/student/all/');
             try {
-                const res = await response.json();
-                if (res?.success) {
-                    this.students = res.success;
+                const response = await axiosInstance.get('/student/all/');
+                if (response.data?.success) {
+                    this.students = response.data.success;
                 } else {
-                    console.log(res.error);
+                    alertStore.showAppAlert(response.data.error, 'error');
                 }
             } catch (error) {
                 console.error("Error fetching students:", error);
@@ -41,8 +68,34 @@ export const useStudentsStore = defineStore("studentsStore", {
                 this.isLoadingStudents = false;
             }
         },
+        async fetchStudentById(id) {
+            this.isLoadingStudent = true;
+
+            try {
+                const [response, r2] = await Promise.all([
+                    axiosInstance.get('/student/byId/?id=' + id),
+                    this.fetchClassList(),
+                ]);
+                if (response.data?.success) {
+                    this.student = response.data.success;
+                    const previousSchool = JSON.parse(response.data.success.previousSchool);
+                    this.setPreviousSchool(previousSchool);
+                } else {
+                    alertStore.showAppAlert(response.data.error, 'error');
+                }
+            } catch (error) {
+                console.error("Error fetching students:", error);
+                this.student = null;
+            } finally {
+                this.isLoadingStudent = false;
+            }
+        },
         setPreviousSchool(data) {
+            this.previousSchool = [];
             this.previousSchool = data;
+        },
+        resetPreviousSchool() {
+            this.previousSchool = [{ ...previousSchoolTemplate }];
         },
         addMoreSchool() {
             this.previousSchool.push({ ...previousSchoolTemplate });
@@ -50,18 +103,14 @@ export const useStudentsStore = defineStore("studentsStore", {
         deleteSchool(index) {
             this.previousSchool.splice(index, 1);
         },
-        async updateDetails(event, id) {
-            const formData = new FormData(event.target);
-            formData.append('id', id);
+        async updateDetails(event, fee_type_id) {
+            const formData = getFormData(event);
             const previousSchoolData = JSON.stringify(this.previousSchool);
             formData.append('previousSchool', previousSchoolData);
+            formData.append('fee_type_id', JSON.stringify(fee_type_id));
             try {
                 this.isUpdatingDetails = true;
-                const res = await fetch("https://lasms.proficiosoftware.com/student/update/", {
-                    method: "post",
-                    body: formData,
-                });
-                const data = await res.json();
+                const { data } = await axiosInstance.post("/student/update/", formData);
                 if (data?.success) {
                     alertStore.showAppAlert(data.success);
                 }
@@ -71,21 +120,42 @@ export const useStudentsStore = defineStore("studentsStore", {
                 this.isUpdatingDetails = false;
             }
         },
-        async addStudent(event) {
-            const formData = new FormData(event.target);
+        async addStudent(event, fee_type_id) {
+            const formData = getFormData(event);
             const previousSchoolData = JSON.stringify(this.previousSchool);
             formData.append('previousSchool', previousSchoolData);
+            formData.append('fee_type_id', JSON.stringify(fee_type_id));
 
-            const res = await fetch("https://lasms.proficiosoftware.com/student/add/", {
-                method: "post",
-                body: formData,
-            });
-            const data = await res.json();
+            const { data } = await axiosInstance.post("/student/add/", formData);
             if (data.success) {
                 alertStore.showAppAlert(data.success);
+                this.setEnrollment(data.enrollment);
             } else {
-                alertStore.showAppAlert(data.error, 'error');
+                alertStore.showAppAlert(res.data.error, 'error');
             }
+        },
+        async searchStudent(enrollment) {
+            try {
+                this.isSearching = true;
+                let { data } = await axiosInstance.get("/payments/byId/?enrollment=" + enrollment);
+                if (data?.success) {
+                    this.student = data.success;
+                } else {
+                    this.student = [];
+                }
+            } catch (error) {
+
+            } finally {
+                this.isSearching = false;
+            }
+        },
+        setEnrollment(enrollment) {
+            this.studentEnrollment = enrollment;
+        },
+        async copyEnrollment() {
+            navigator.clipboard.writeText(this.studentEnrollment).then(() => {
+                alertStore.showAppAlert("Enrollment number copied");
+            });
         }
     }
 })

@@ -27,3 +27,7 @@ a,button,input,textarea, select {
 button {
     @apply cursor-pointer disabled:cursor-not-allowed;
 }
+
+.grid-responsive {
+    @apply grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4;
+}

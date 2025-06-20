@@ -20,7 +20,7 @@ onAuthStateChanged(auth, async (user) => {
     const data = await res.json();
     userStore.setUser({
       ...userStore.getUser,
-      role: data.role,
+      ...data,
     });
     router.push(route.redirectedFrom?.path || "/");
   } else {

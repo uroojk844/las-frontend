@@ -1,17 +1,70 @@
 <script setup>
-import Card from '../components/Dashboard/Card.vue';
+import { computed, onMounted, ref } from 'vue';
+import Card from '@/components/Dashboard/Card.vue';
+import MainHeader from '@/components/MainHeader.vue';
+import { RouterLink } from 'vue-router';
+import { Bar, Pie } from 'vue-chartjs';
+import { useDashboardStore } from '../store/dashboard';
+import { storeToRefs } from 'pinia';
 
-const dashboardData = [
-  { label: 'Students', value: 1500, icon: 'ph:student-fill' },
-  { label: 'Instructors', value: 10, icon: 'mdi:google-classroom' },
-  { label: 'Drivers', value: 6, icon: 'mdi:bus-school' },
-  { label: 'Other staffs', value: 5, icon: 'ph:users-three-fill' },
-];
+const dashboardStore = useDashboardStore();
+const { getDashboartData, getLoadingStudentsData, getStudentsChartData } = storeToRefs(dashboardStore);
+
+
+const dashboardData = computed(() => [
+  { label: 'Total students', value: getDashboartData.value.total_students, icon: 'ph:student-fill', path: '/student' },
+  { label: 'Total admins', value: getDashboartData.value.total_admins, icon: 'ph:users-three-fill', path: '/admin' },
+]);
+
+const usersChartData = computed(() => {
+  return {
+    labels: dashboardData.value.map(d => d.label),
+    datasets: [
+      {
+        data: dashboardData.value.map(d => d.value)
+      }
+    ],
+  }
+});
+
+
+onMounted(() => {
+  dashboardStore.initialize();
+});
 </script>
 
 <template>
+  <MainHeader title="Analytics" />
+  <section class="mb-4 gap-4 grid sm:grid-cols-2 md:grid-cols-3">
+    <div class="relative p-4 bg-white rounded-md">
+      <Pie :data="usersChartData" :options="{
+        plugins: {
+          title: {
+            text: 'All users',
+          },
+        }
+      }" />
+    </div>
+
+    <div v-if="getLoadingStudentsData" class="relative sm:col-span-2 p-4 bg-white rounded-md">
+      <Bar :data="getStudentsChartData" :options="{
+        plugins: {
+          title: {
+            text: 'Class wise student\'s data',
+            position: 'top',
+            padding: {
+              top: 0,
+            }
+          }
+        },
+      }" />
+    </div>
+  </section>
+
   <section class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-    <Card v-for="(data, index) in dashboardData" :key="index" :data />
+    <RouterLink v-for="(data, index) in dashboardData" :key="index" :to="data.path">
+      <Card :data />
+    </RouterLink>
   </section>
 </template>
 

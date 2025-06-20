@@ -77,7 +77,53 @@ export const router = createRouter({
                             component: () => import("@/pages/Admin/Create.vue"),
                         },
                     ],
-                }
+                },
+                {
+                    path: "fee",
+                    name: "Fee",
+                    meta: { permission: ["admin"] },
+                    component: () => import("@/pages/Fee/FeeView.vue"),
+                    children: [
+                        {
+                            name: 'SubmitFee',
+                            path: "",
+                            component: () => import("@/pages/Fee/Submit.vue"),
+                        },
+                        {
+                            name: 'FeeDetail',
+                            path: "details",
+                            component: () => import("@/pages/Fee/Details.vue"),
+                        },
+                        {
+                            name: 'FeeReport',
+                            path: "report",
+                            component: () => import("@/pages/Fee/Report.vue"),
+                        },
+                    ]
+                },
+                {
+                    path: "books",
+                    name: "Book",
+                    meta: { permission: ["admin"] },
+                    component: () => import("@/pages/Book/BookView.vue"),
+                    children: [
+                        {
+                            name: 'AllBooks',
+                            path: "",
+                            component: () => import("@/pages/Book/All.vue"),
+                        },
+                        {
+                            name: 'BuyBook',
+                            path: "buy",
+                            component: () => import("@/pages/Book/Buy.vue"),
+                        },
+                        {
+                            name: 'EditBook',
+                            path: "edit",
+                            component: () => import("@/pages/Book/Edit.vue"),
+                        },
+                    ]
+                },
             ]
         },
 

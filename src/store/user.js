@@ -1,8 +1,9 @@
 import { defineStore } from "pinia";
 import { auth } from "@/firebase";
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, updateCurrentUser } from "firebase/auth";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, updateCurrentUser, setPersistence, browserLocalPersistence } from "firebase/auth";
 import { useRouter } from "vue-router";
 import { nextTick } from "vue";
+import { useAlertStore } from "./Alert";
 
 const useUserStore = defineStore("userStore", {
     state: () => ({
@@ -23,8 +24,15 @@ const useUserStore = defineStore("userStore", {
             this.isLoading = true;
             const formData = new FormData(event.target);
             const { email, password } = Object.fromEntries(formData);
-            await signInWithEmailAndPassword(auth, email, password);
-            this.isLoading = false;
+            try {
+                await setPersistence(auth, browserLocalPersistence);
+                await signInWithEmailAndPassword(auth, email, password);
+            } catch (error) {
+                const alertStore = useAlertStore();
+                alertStore.showAppAlert('Wrong email or password!!', 'error')
+            } finally {
+                this.isLoading = false;
+            }
         },
         async createAdmin(event) {
             const router = useRouter();

@@ -13,8 +13,8 @@ const { getAlert } = storeToRefs(alertStore);
             'bg-emerald-500 text-gray-50': getAlert.type == 'success',
             'bg-red-400 text-gray-50': getAlert.type == 'error',
         }">
-        <icon :icon="getAlert.type ? 'ph:check-circle-bold' : 'ph:x-circle-bold'" class="text-lg" />
-        <span class="flex-1">{{ getAlert.message }}</span>
+        <icon :icon="getAlert.type == 'success' ? 'ph:check-circle-bold' : 'ph:x-circle-bold'" class="text-lg" />
+        <span class="flex-1 line-clamp-3 max-w-60">{{ getAlert.message }}</span>
     </div>
 </template>
 

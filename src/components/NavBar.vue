@@ -7,7 +7,7 @@ const isSidebarOpen = inject("isSidebarOpen");
 </script>
 
 <template>
-    <nav class="w-full flex justify-between items-center px-4 py-3 bg-white border-b border-gray-200">
+    <nav class="w-full flex justify-between items-center px-4 py-3 bg-white border-b border-gray-200 print:hidden">
         <div class="flex items-center gap-4 flex-1">
             <button @click.stop="isSidebarOpen = !isSidebarOpen" class="md:hidden">
                 <Icon icon="gravity-ui:bars" class="text-xl text-accent" />

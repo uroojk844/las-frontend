@@ -12,37 +12,43 @@ import { useRoute } from 'vue-router';
 import useUserStore from '@/store/user';
 import { useStudentsStore } from '@/store/students';
 import { storeToRefs } from 'pinia';
-import PhotoPicker from '../../components/PhotoPicker.vue';
-import { useAlertStore } from '../../store/Alert';
-
-const alertStore = useAlertStore()
-
+import PhotoPicker from '@/components/PhotoPicker.vue';
+import CheckBoxGroup from '@/components/CheckBoxGroup.vue';
+import { useFeeStore } from '@/store/fee';
 
 const disabled = ref(true)
-const classList = ['Nursury', 'LKG', 'UKG', '1', '2', 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
 const studentsStore = useStudentsStore();
-const { getStudents, getPreviousSchool, getIsUpdatingDetails } = storeToRefs(studentsStore);
+const { getStudent, getPreviousSchool, getIsUpdatingDetails, classListOption } = storeToRefs(studentsStore);
+
+const feeStore = useFeeStore();
+const { getFeeTypes } = storeToRefs(feeStore)
 
 const route = useRoute();
 const id = route.params.id;
-const student = computed(() => getStudents.value.find(s => s.id === route.params.id));
-// const IMG_URL = `https://lasms.proficiosoftware.com/documents/${route.params.id}/`;
 
 const userStore = useUserStore();
 
+const options = computed(() => getFeeTypes.value.map((fee) => {
+    return {
+        label: `${fee.name} fee`,
+        value: fee.id,
+    }
+}));
+const fee_type_id = ref([]);
+
 async function updateDetail(event) {
-    await studentsStore.updateDetails(event, id);
+    await studentsStore.updateDetails(event, fee_type_id.value);
     disabled.value = true;
 }
 
-watch(() => student.value, () => {
-    const data = JSON.parse(student.value.previousSchool) || [];
-    studentsStore.setPreviousSchool(data);
+watch(getStudent, () => {
+    fee_type_id.value = JSON.parse(getStudent.value.fee_type_id);
 })
 
 onMounted(() => {
-    if (!getStudents.value.length) studentsStore.fetchStudents();
+    studentsStore.fetchStudentById(id);
+    feeStore.fetchFeeTypes();
 });
 </script>
 
@@ -55,53 +61,75 @@ onMounted(() => {
         </FilledButton>
     </MainHeader>
 
-    <form v-if="student" @submit.prevent="updateDetail" method="post" enctype="multipart/form-data"
+    <form v-if="getStudent" @submit.prevent="updateDetail" method="post" enctype="multipart/form-data"
         class="bg-white p-4 rounded-md grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
 
         <div class="col-span-full font-medium text-light-gray -mb-2">Student details</div>
 
-        <InputField label="First name" name="firstName" v-model="student.firstName" :disabled />
-        <InputField label="Middle name" name="middleName" v-model="student.middleName" :disabled :required="false" />
-        <InputField label="Last name" name="lastName" v-model="student.lastName" :disabled />
+        <input type="hidden" name="id" :value="getStudent.id" required />
 
-        <RadioGroup label="Gender" name="gender" v-model="student.gender" :disabled />
+        <InputField label="First name" name="firstName" v-model="getStudent.firstName" :disabled />
+        <InputField label="Middle name" name="middleName" v-model="getStudent.middleName" :disabled :required="false" />
+        <InputField label="Last name" name="lastName" v-model="getStudent.lastName" :disabled />
 
-        <InputField label="Date of birth" name="dob" type="date" v-model="student.dob" :disabled />
-        <InputField label="Aadhar number" name="aadhar" v-model="student.aadhar" :disabled />
+        <RadioGroup label="Gender" name="gender" v-model="getStudent.gender" :disabled />
+
+        <InputField label="Date of birth" name="dob" type="date" v-model="getStudent.dob" :disabled />
+        <InputField label="Aadhar number" name="aadhar" v-model="getStudent.aadhar" :disabled />
+        <InputField label="Enrollment number" name="enrollment" v-model="getStudent.enrollment" disabled />
+
+        <div class="col-span-full font-medium text-light-gray -mb-2">Fee details</div>
+
+        <CheckBoxGroup class="col-span-full" label="Fee" v-model="fee_type_id" :options :disabled />
+        <RadioGroup class="col-span-full" label="Transport" name="transport" v-model="getStudent.transport" :disabled
+            :values="[
+                {
+                    label: 'Yes',
+                    value: 1,
+                },
+                {
+                    label: 'No',
+                    value: 0,
+                },
+            ]" />
+        <InputField label="Distance" name="distance" v-model="getStudent.distance" :required="getStudent.transport"
+            :disabled />
 
         <div class="col-span-full font-medium text-light-gray -mb-2">Documents</div>
 
         <!-- documents -->
         <section class="flex flex-wrap justify-between col-span-full gap-4">
-            <PhotoPicker class="max-w-48 aspect-[3/4]" message="Click to upload student photo" :url="student.photo"
+            <PhotoPicker class="max-w-48 aspect-[3/4]" message="Click to upload student photo" :url="getStudent.photo"
                 name="photo" :disabled />
-            <PhotoPicker class="aspect-video flex-1" message="Click to upload Aadhar Front" :url="student.aadharFront"
-                name="aadharFront" :disabled />
-            <PhotoPicker class="aspect-video flex-1" message="Click to upload Aadhar Back" :url="student.aadharBack"
+            <PhotoPicker class="aspect-video flex-1" message="Click to upload Aadhar Front"
+                :url="getStudent.aadharFront" name="aadharFront" :disabled />
+            <PhotoPicker class="aspect-video flex-1" message="Click to upload Aadhar Back" :url="getStudent.aadharBack"
                 name="aadharBack" :disabled />
         </section>
 
         <div class="col-span-full font-medium text-light-gray -mb-2">Contact details</div>
 
-        <InputField label="Father's name" name="fatherName" v-model="student.fatherName" :disabled />
-        <InputField label="Mother's name" name="motherName" v-model="student.motherName" :disabled :required="false" />
-        <InputField label="Guardian's name" name="guardianName" v-model="student.guardianName" :disabled
+        <InputField label="Father's name" name="fatherName" v-model="getStudent.fatherName" :disabled />
+        <InputField label="Mother's name" name="motherName" v-model="getStudent.motherName" :disabled
             :required="false" />
-        <InputField label="Email" name="email" type="email" v-model="student.email" :disabled :required="false" />
-        <InputField label="Phone number" name="phone" type="tel" v-model="student.phone" :disabled />
-        <InputField label="Alternate Phone number" name="phone2" type="tel" v-model="student.phone2" :disabled
+        <InputField label="Guardian's name" name="guardianName" v-model="getStudent.guardianName" :disabled
+            :required="false" />
+        <InputField label="Email" name="email" type="email" v-model="getStudent.email" :disabled :required="false" />
+        <InputField label="Phone number" name="phone" type="tel" v-model="getStudent.phone" :disabled />
+        <InputField label="Alternate Phone number" name="phone2" type="tel" v-model="getStudent.phone2" :disabled
             :required="false" />
 
         <div class="col-span-full grid gap-4 sm:grid-cols-2">
-            <TextField label="Permanent Address" name="address" v-model="student.address" :disabled />
-            <TextField label="Current Address" name="address2" v-model="student.address2" :disabled :required="false" />
+            <TextField label="Permanent Address" name="address" v-model="getStudent.address" :disabled />
+            <TextField label="Current Address" name="address2" v-model="getStudent.address2" :disabled
+                :required="false" />
         </div>
 
         <div class="col-span-full font-medium text-light-gray -mb-2">Academic details</div>
 
         <div class="flex justify-between col-span-full items-end">
-            <SelectField label="Joining class" name="joiningClass" :options="classList" v-model="student.joiningClass"
-                :disabled />
+            <SelectField label="Joining class" name="joiningClass" :options="classListOption"
+                v-model="getStudent.joiningClass" :disabled />
 
             <FilledButton v-if="!disabled" @click.prevent="studentsStore.addMoreSchool">
                 <icon icon="material-symbols:add-notes-rounded" class="text-xl" /> Add more
@@ -110,17 +138,21 @@ onMounted(() => {
 
         <hr class="border-secondary col-span-full">
 
-        <div v-for="(item, index) in getPreviousSchool" :key="index" class="flex gap-4 items-end col-span-full">
-            <SelectField class="flex-1" label="Previous class" v-model="item.class" :options="classList" :disabled />
-            <InputField class="flex-1" label="School/College name" v-model="item.school" :disabled />
-            <InputField class="flex-1" label="Passing year" v-model="item.passingYear" :disabled type="month" />
-            <InputField class="flex-1" label="Percentage" v-model="item.percentage" :disabled type="number" max="100" />
-            <FilledButton v-if="!disabled"  type="danger" class="h-10" @click.prevent="studentsStore.deleteSchool(index)">
+        <div v-if="getPreviousSchool" v-for="(item, index) in getPreviousSchool" :key="index"
+            class="grid gap-4 items-end grid-cols-[repeat(4,1fr)_auto] col-span-full">
+            <SelectField label="Previous class" v-model="item.class" :options="classListOption" :disabled />
+            <InputField label="School/College name" name="school" v-model="item.school" :disabled />
+            <InputField label="Passing year" name="passingYear" v-model="item.passingYear" :disabled
+                type="month" />
+            <InputField label="Percentage" name="percentage" v-model="item.percentage" :disabled
+                type="number" max="100" />
+            <FilledButton v-if="!disabled" type="danger" class="h-10"
+                @click.prevent="studentsStore.deleteSchool(index)">
                 <icon icon="ph:trash-bold" />
             </FilledButton>
         </div>
 
-        <div class="flex justify-between col-span-full mt-2">
+        <div class="flex justify-between col-span-full mt-2" v-if="userStore.getIsAdmin">
             <FilledButton :disabled :isLoading="getIsUpdatingDetails">
                 <icon icon="material-symbols:person-edit-rounded" class="text-xl" /> Update
             </FilledButton>

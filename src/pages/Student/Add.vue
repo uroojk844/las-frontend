@@ -6,19 +6,54 @@ import RadioGroup from '@/components/RadioGroup.vue';
 import TextField from '@/components/TextField.vue';
 import SelectField from '@/components/SelectField.vue';
 import PhotoPicker from '@/components/PhotoPicker.vue';
+import CheckBoxGroup from '@/components/CheckBoxGroup.vue';
+import Model from '@/components/Model.vue';
+
 import { useStudentsStore } from '../../store/students';
 import { storeToRefs } from 'pinia';
-
-const classList = ['Nursury', 'LKG', 'UKG', '1', '2', 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+import { computed, onMounted, ref, watch } from 'vue';
+import { useFeeStore } from '@/store/fee';
 
 const studentsStore = useStudentsStore();
-const { getPreviousSchool } = storeToRefs(studentsStore);
+const { getPreviousSchool, classListOption, getStudentEnrolloment } = storeToRefs(studentsStore);
+
+const feeStore = useFeeStore();
+const { getFeeTypes } = storeToRefs(feeStore);
+
+const fee_type_id = ref([1, 2]);
+
+const options = computed(() => getFeeTypes.value.map((fee) => {
+    return {
+        label: `${fee.name} fee`,
+        value: fee.id,
+    }
+}));
+
+const transport = ref(0)
+
+watch(options, () => {
+    if (options.value.length) options.value.pop();
+}, { immediate: true })
+
+const isOpen = ref(false);
+
+watch(getStudentEnrolloment, () => {
+    if (getStudentEnrolloment.value) {
+        isOpen.value = true;
+    }
+});
+
+onMounted(() => {
+    studentsStore.fetchClassList();
+    studentsStore.resetPreviousSchool();
+    feeStore.fetchFeeTypes();
+});
 </script>
 
 <template>
     <MainHeader title="Add Student"></MainHeader>
 
-    <form @submit.prevent="studentsStore.addStudent" method="post" enctype="multipart/form-data"
+    <form @submit.prevent="studentsStore.addStudent($event, fee_type_id)"
         class="bg-white p-4 rounded-md grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
 
         <div class="col-span-full font-medium text-light-gray -mb-2">Student details</div>
@@ -31,33 +66,6 @@ const { getPreviousSchool } = storeToRefs(studentsStore);
         <InputField label="Aadhar number" name="aadhar" />
 
         <div class="col-span-full font-medium text-light-gray -mb-2">Documents</div>
-
-        <!-- <section class="flex flex-wrap justify-between col-span-full gap-4">
-            <div class="w-[189px] basis-[189px] aspect-[3/4]">
-                <img v-if="photo" :src="photo"
-                    class="object-cover object-center size-full border border-gray-200 rounded-md" />
-                <label v-else for="photo" class="photo-placeholder">
-                    Click to upload Student Photo
-                </label>
-                <input type="file" @change="createPreview" accept="image/*" class="hidden" name="photo" id="photo" />
-            </div>
-            <div class="flex-1 max-w-md min-w-72">
-                <img v-if="aadharFront" :src="aadharFront" class="card" />
-                <label v-else for="aadharFront" class="card-placeholder">
-                    Click to upload Aadhar Front
-                </label>
-                <input type="file" @change="createPreview" accept="image/*" class="hidden" name="aadharFront"
-                    id="aadharFront" />
-            </div>
-            <div class="flex-1 max-w-md min-w-72">
-                <img v-if="aadharBack" :src="aadharBack" class="card" />
-                <label v-else for="aadharBack" class="card-placeholder">
-                    Click to upload Aadhar Back
-                </label>
-                <input type="file" @change="createPreview" accept="image/*" class="hidden" name="aadharBack"
-                    id="aadharBack" />
-            </div>
-        </section> -->
 
         <section class="flex flex-wrap justify-between col-span-full gap-4">
             <PhotoPicker class="max-w-48 aspect-[3/4]" message="Click to upload student photo" name="photo" />
@@ -81,16 +89,31 @@ const { getPreviousSchool } = storeToRefs(studentsStore);
 
         <div class="col-span-full font-medium text-light-gray -mb-2">Academic details</div>
 
-        <SelectField label="Joining class" name="joiningClass" :options="classList" />
+        <SelectField label="Joining class" name="joiningClass" :options="classListOption" />
 
         <hr class="border-secondary col-span-full">
 
         <div v-for="(item, index) in getPreviousSchool" :key="index" class="contents">
-            <SelectField label="Previous class" @change="(v) => item.class = v" :options="classList" />
+            <SelectField label="Previous class" @change="(v) => item.class = v" :options="classListOption" />
             <InputField label="School/College name" v-model="item.school" />
             <InputField label="Passing year" v-model="item.passingYear" type="month" />
             <InputField label="Percentage" v-model="item.percentage" type="number" max="100" />
         </div>
+
+        <div class="col-span-full font-medium text-light-gray -mb-2">Fee details</div>
+
+        <CheckBoxGroup class="col-span-full" label="Select additional fee" v-model="fee_type_id" :options="options" />
+        <RadioGroup class="col-span-full" label="Transport" name="transport" v-model="transport" :values="[
+            {
+                label: 'Yes',
+                value: 1,
+            },
+            {
+                label: 'No',
+                value: 0,
+            }
+        ]" />
+        <InputField label="Distance from school" name="distance" :required="!!transport" />
 
         <div class="col-span-full mt-2">
             <FilledButton>
@@ -98,6 +121,24 @@ const { getPreviousSchool } = storeToRefs(studentsStore);
             </FilledButton>
         </div>
     </form>
+
+    <Model v-model="isOpen" class="max-w-xl">
+        <div class="grid place-items-center min-h-40">
+            <h1 class="text-3xl">Admission successful!</h1>
+            <div class="flex gap-2 items-center">
+                <span class="text-xl font-medium">Student enrollment number is</span>
+                <span
+                    class="px-2 select-all py-1 border-2 text-sm border-green-600 border-dashed rounded-md bg-green-200">
+                    {{ getStudentEnrolloment }}
+                </span>
+                <button @click="studentsStore.copyEnrollment"
+                    class="px-3 py-1 bg-primary text-white flex items-center gap-1 rounded-md">
+                    <icon icon="material-symbols:content-copy" /> Copy
+                </button>
+            </div>
+            <FilledButton @click="isOpen = false">Close</FilledButton>
+        </div>
+    </Model>
 </template>
 
 <style scoped>

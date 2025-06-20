@@ -16,7 +16,7 @@ defineProps({
 </script>
 
 <template>
-    <button class="flex items-center gap-2 justify-center disabled:bg-light-gray text-white hover:brightness-110"
+    <button class="flex items-center gap-2 justify-center whitespace-nowrap disabled:bg-light-gray text-white hover:brightness-110"
         :class="{
             'bg-primary': type === 'primary',
             'bg-red-400': type === 'danger',

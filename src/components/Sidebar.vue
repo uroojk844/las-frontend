@@ -2,7 +2,7 @@
 import { computed, inject, ref } from "vue";
 import { RouterLink } from "vue-router";
 import useUserStore from "@/store/user";
-import { handleClickedOutside } from "../utils/handleClickOutside";
+import { handleClickedOutside } from "@/utils/handleClickOutside";
 
 const sidebarLinks = [
   { name: "Dashboard", icon: "material-symbols:space-dashboard-rounded", path: "/" },
@@ -22,6 +22,24 @@ const sidebarLinks = [
     children: [
       { name: "All users", path: "/admin" },
       { name: "Create user", path: "/admin/create" },
+    ]
+  },
+  {
+    name: "Fee", icon: "ri:money-rupee-circle-fill",
+    permission: ["admin"],
+    children: [
+      { name: "Submit", path: "/fee" },
+      { name: "Details", path: "/fee/details" },
+      { name: "Report", path: "/fee/report" },
+    ]
+  },
+  {
+    name: "Book", icon: "material-symbols:book-3-rounded",
+    permission: ["admin"],
+    children: [
+      { name: "List", path: "/books" },
+      { name: "Buy", path: "/books/buy" },
+      { name: "Edit", path: "/books/edit" },
     ]
   },
 ];
@@ -60,12 +78,10 @@ const isAllowedLinks = computed(() => {
 </script>
 
 <template>
-  <aside :class="{ open: isSidebarOpen }" ref="sidebar"
-    class="w-64 h-full p-4 bg-white border-r border-gray-200 transition-all ">
+  <aside :class="{ open: isSidebarOpen }" ref="sidebar" class="w-64 h-full p-4">
     <div class="text-2xl font-bold mb-2 text-accent">LASMS</div>
-
     <div v-for="(item, index) in isAllowedLinks" :key="index">
-      <details v-if="item?.children" class="group [&:has(.router-link-exact-active)>summary]:text-accent">
+      <details :open="item?.children?.map(c => c.path).includes($route.path)" v-if="item?.children" class="group [&:has(.router-link-exact-active)>summary]:text-accent">
         <summary
           class="flex items-center gap-2 p-2 rounded text-[#8b8b8b] hover:text-accent cursor-pointer transition-colors">
           <icon :icon="item.icon" class="size-6" /> {{ item.name }}
@@ -100,7 +116,7 @@ const isAllowedLinks = computed(() => {
 @reference "@/style.css";
 
 aside {
-  @apply flex flex-col gap-2 bg-white border-r border-gray-200 transition-all;
+  @apply flex flex-col gap-2 bg-white border-r border-gray-200 transition-all print:hidden;
 
   @media screen and (width < 48rem) {
     @apply absolute top-0 left-0 -translate-x-full w-64 h-full z-50;
