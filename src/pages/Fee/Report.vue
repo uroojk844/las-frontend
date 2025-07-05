@@ -22,11 +22,15 @@ const joiningClass = ref('')
 
 const excelData = computed(() => {
     if (!getStudentList.value.length) return;
+
     let studentList = JSON.parse(JSON.stringify(getStudentList.value));
 
-    return studentList.map(student => {
-        delete student['id'];
-        JSON.parse(student['balance_fee']).map(fee => {
+    return studentList.map((student: any) => {
+        delete student.id;
+        JSON.parse(student.balance_fee).map((fee: {
+            name: string,
+            amount: number,
+        }) => {
             student[`${fee.name} fee`] = fee.amount;
         })
         delete student['balance_fee'];
@@ -83,7 +87,11 @@ onMounted(() => {
                             <span class="capitalize">Total:</span>
                             <span class="flex items-center">
                                 <icon icon="mdi:currency-rupee" />
-                                {{JSON.parse(user.balance_fee).reduce((acc, cur) => +cur.amount + acc, 0)}}
+                                {{
+                                    JSON.parse(user.balance_fee).reduce((acc: number, cur: typeof user.balance_fee) =>
+                                        +cur.amount + acc,
+                                        0)
+                                }}
                             </span>
                         </div>
                     </td>

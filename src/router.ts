@@ -4,7 +4,6 @@ import {
   RouteLocationNormalizedGeneric,
 } from "vue-router";
 import Auth from "@/pages/Auth/Auth.vue";
-import Login from "@/pages/Auth/Login.vue";
 import useUserStore from "@/store/user.js";
 
 export const router = createRouter({
@@ -17,7 +16,7 @@ export const router = createRouter({
         {
           path: "login",
           name: "Login",
-          component: Login,
+          component: () => import("@/pages/Auth/Login.vue"),
         },
         {
           path: "register",

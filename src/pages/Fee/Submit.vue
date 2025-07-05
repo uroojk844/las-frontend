@@ -18,18 +18,6 @@ const { enrollment, getIsSubmittingFee, getIsSearchingFeeDetail, getFeeDetails, 
 
 const monthOptions = [
     {
-        label: 'jan',
-        value: 'jan',
-    },
-    {
-        label: 'feb',
-        value: 'feb',
-    },
-    {
-        label: 'mar',
-        value: 'mar',
-    },
-    {
         label: 'apr',
         value: 'apr',
     },
@@ -65,9 +53,21 @@ const monthOptions = [
         label: 'dec',
         value: 'dec',
     },
+    {
+        label: 'jan',
+        value: 'jan',
+    },
+    {
+        label: 'feb',
+        value: 'feb',
+    },
+    {
+        label: 'mar',
+        value: 'mar',
+    },
 ];
 
-const feeDetails = reactive<{
+let feeDetails = reactive<{
     payment_mode: 'cash' | 'bank' | 'upi',
     fee_type_id: number[],
     fee_data: IFeeData[],
@@ -105,8 +105,28 @@ const feeOptions = computed(() => getFeeTypes.value.map(fee => {
     };
 }));
 
+function calcFee(fee: IFeeData) {
+    let amount = 0;
+    const totalMonths = feeDetails.months.length;
+
+    switch (fee.id) {
+        case 2:
+            amount = fee.amount * Math.round((totalMonths + feeDetails.paidMonths.length) / 6);
+            break;
+        case 5:
+            amount = fee.amount;
+            break;
+        default:
+            amount = fee.amount * totalMonths
+            break;
+    }
+
+    return amount;
+}
+
 watch([getFeeDetails, () => feeDetails.months], ([newValue, _]) => {
     if (!getFeeDetails.value || !newValue) return;
+
     try {
         let fee_data = JSON.parse(newValue.fee_data) as IFeeData[];
         let fee_type_id = JSON.parse(newValue.fee_type_id) as number[];
@@ -121,9 +141,9 @@ watch([getFeeDetails, () => feeDetails.months], ([newValue, _]) => {
         feeDetails.fee_data.map((d) => {
             fee_type_id_list[d.id] = {
                 id: d.id,
-                amount_paid: d.id == 2 ? +d.amount * Math.round((totalMonths / 6)) : +d.amount * totalMonths,
+                amount_paid: calcFee(d),
                 name: `${d.name} fee`,
-                amount_to_pay: d.id == 2 ? +d.amount * Math.round((totalMonths / 6)) : +d.amount * totalMonths,
+                amount_to_pay: calcFee(d),
                 balance_fee: 0,
                 balance_transport_fee: 0,
             };
@@ -140,6 +160,17 @@ watch([getFeeDetails, () => feeDetails.months], ([newValue, _]) => {
             }
             feeDetails.fee_type_id.push(10);
         }
+
+        feeDetails.months.map((m, idx) => {
+            if (feeDetails.paidMonths.includes(m)) {
+                feeDetails.months.splice(idx, 1);
+            }
+        });
+
+        if (!newValue?.admission) {
+            feeDetails.fee_type_id.push(5);
+        }
+
     } catch (error) {
         console.error("Error parsing feeDetails JSON:", error);
     }
@@ -149,7 +180,11 @@ const discount = ref(0)
 const totalAmount = computed(() => feeDetails.fee_type_id.reduce((acc, cur) => +fee_type_id_list[cur].amount_to_pay + acc, 0));
 const amountPaid = computed(() => feeDetails.fee_type_id.reduce((acc, cur) => +fee_type_id_list[cur].amount_paid + acc, 0));
 const totalBalace = computed(() => feeDetails.fee_type_id.reduce((acc, cur) => +fee_type_id_list[cur].balance_fee + acc, 0));
-const discountAmount = computed(() => +amountPaid.value * (+discount.value / 100));
+const discountAmount = computed(() => {
+    if (!fee_type_id_list[1].amount_to_pay) return 0;
+
+    return +fee_type_id_list[1].amount_to_pay * (+discount.value / 100)
+});
 
 function updateBalace(event: Event, id: number) {
     let fee = fee_type_id_list[id];
@@ -184,13 +219,14 @@ function updateBalace(event: Event, id: number) {
             <InputField label="Class" v-model="getFeeDetails.joiningClass" disabled :required="false" />
             <InputField label="Transport distance (Km)" v-model="getFeeDetails.distance" disabled :required="false" />
         </section>
-        
+
         <MainHeader title="Enter fee details" class="mt-4" />
 
         <section class="bg-surface p-4 rounded-md grid gap-4">
             <form
                 @submit.prevent="feeStore.submitFee($event, feeDetails.fee_type_id, fee_type_id_list, feeDetails.months)"
                 class="grid-responsive">
+                <input type="hidden" name="enrollment" v-model="enrollment" required />
                 <input type="hidden" name="collected_by" :value="getUser?.id" required />
                 <input type="hidden" name="student_id" :value="getFeeDetails.student_id" required />
 
@@ -220,7 +256,8 @@ function updateBalace(event: Event, id: number) {
                     ]" />
 
                 <CheckBoxGroup class="col-span-full" label="Check fee to pay" v-model="feeDetails.fee_type_id"
-                    :options="feeOptions" />
+                    :options="feeOptions"
+                    :disabledFields="[getFeeDetails?.admission ? getFeeDetails.admission.toString() : '']" />
 
                 <div class="flex gap-4 col-span-full" v-for="(id, index) in feeDetails.fee_type_id" :key="index">
                     <InputField type="number" min="0" :max="fee_type_id_list[id].amount_to_pay"

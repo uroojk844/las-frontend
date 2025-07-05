@@ -3,18 +3,19 @@ import { computed, ref } from "vue";
 import { getFormData } from "../utils/getFormData";
 import { useAlertStore } from "./Alert";
 import { axiosInstance } from "../utils/api";
-import { IFeeType, IPaymentDetail } from "./fee.interface";
+import { IFeeType, IPaymentDetail, IReport } from "./fee.interface";
+import { useRouter } from "vue-router";
 
 const alertStore = useAlertStore();
 
 export const useFeeStore = defineStore("fee", () => {
-  const studentList = ref([]);
+  const studentList = ref<IReport[]>([]);
   const searching = ref(false);
 
   const getStudentList = computed(() => studentList.value);
   const getIsSearching = computed(() => searching.value);
 
-  async function fetchReport(event: SubmitEvent) {
+  async function fetchReport(event: Event) {
     const data = getFormData(event);
 
     try {
@@ -55,7 +56,7 @@ export const useFeeStore = defineStore("fee", () => {
       isSubmittingFee.value = true;
       const response = await axiosInstance.post("/payments/pay/", data);
       alertStore.showAppAlert(response.data?.success);
-      (event.target as HTMLFormElement).reset();
+      await searchFeeDetails(event);
     } catch (error: any) {
       alertStore.showAppAlert(error, "error");
     } finally {
@@ -76,7 +77,8 @@ export const useFeeStore = defineStore("fee", () => {
 
     try {
       isSearchingFeeDetail.value = true;
-      const [r1, r2] = await Promise.all([
+      feeDetails.value = null;
+      const [r1, _] = await Promise.all([
         axiosInstance.post("/payments/details/", data),
         fetchFeeTypes(),
       ]);
@@ -118,10 +120,7 @@ export const useFeeStore = defineStore("fee", () => {
 
     try {
       payingBalance.value = true;
-      const response = await axiosInstance.post(
-        "/payments/payBalance/",
-        formData
-      );
+      await axiosInstance.post("/payments/payBalance/", formData);
       alertStore.showAppAlert("Balance paid successfully!!");
       (event.target as HTMLFormElement).reset();
     } catch (error: any) {

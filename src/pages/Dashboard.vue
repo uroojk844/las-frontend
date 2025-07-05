@@ -10,7 +10,6 @@ import { storeToRefs } from 'pinia';
 const dashboardStore = useDashboardStore();
 const { getDashboartData, getLoadingStudentsData, getStudentsChartData } = storeToRefs(dashboardStore);
 
-
 const dashboardData = computed(() => [
   { label: 'Total students', value: getDashboartData.value?.total_students, icon: 'ph:student-fill', path: '/student' },
   { label: 'Total admins', value: getDashboartData.value?.total_admins, icon: 'ph:users-three-fill', path: '/admin' },
@@ -51,7 +50,7 @@ onMounted(() => {
       }" />
     </div>
 
-    <div v-if="getLoadingStudentsData" class="relative sm:col-span-2 p-4 bg-surface rounded-md border border-border">
+    <div v-if="getLoadingStudentsData" class="relative min-h-80 sm:col-span-2 p-4 bg-surface rounded-md border border-border">
       <Bar :data="getStudentsChartData" :options="{
         plugins: {
           legend: {
