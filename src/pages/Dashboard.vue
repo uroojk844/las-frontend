@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
 import Card from '@/components/Dashboard/Card.vue';
 import MainHeader from '@/components/MainHeader.vue';
@@ -12,8 +12,8 @@ const { getDashboartData, getLoadingStudentsData, getStudentsChartData } = store
 
 
 const dashboardData = computed(() => [
-  { label: 'Total students', value: getDashboartData.value.total_students, icon: 'ph:student-fill', path: '/student' },
-  { label: 'Total admins', value: getDashboartData.value.total_admins, icon: 'ph:users-three-fill', path: '/admin' },
+  { label: 'Total students', value: getDashboartData.value?.total_students, icon: 'ph:student-fill', path: '/student' },
+  { label: 'Total admins', value: getDashboartData.value?.total_admins, icon: 'ph:users-three-fill', path: '/admin' },
 ]);
 
 const usersChartData = computed(() => {
@@ -36,9 +36,14 @@ onMounted(() => {
 <template>
   <MainHeader title="Analytics" />
   <section class="mb-4 gap-4 grid sm:grid-cols-2 md:grid-cols-3">
-    <div class="relative p-4 bg-white rounded-md">
-      <Pie :data="usersChartData" :options="{
+    <div class="relative p-4 bg-surface rounded-md border border-border">
+      <Pie :data="usersChartData as any" :options="{
         plugins: {
+          legend: {
+            labels: {
+              color: '#a4a5a4',
+            }
+          },
           title: {
             text: 'All users',
           },
@@ -46,9 +51,14 @@ onMounted(() => {
       }" />
     </div>
 
-    <div v-if="getLoadingStudentsData" class="relative sm:col-span-2 p-4 bg-white rounded-md">
+    <div v-if="getLoadingStudentsData" class="relative sm:col-span-2 p-4 bg-surface rounded-md border border-border">
       <Bar :data="getStudentsChartData" :options="{
         plugins: {
+          legend: {
+            labels: {
+              color: '#a4a5a4',
+            }
+          },
           title: {
             text: 'Class wise student\'s data',
             position: 'top',

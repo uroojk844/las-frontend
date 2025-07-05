@@ -1,7 +1,7 @@
 const formatter = new Intl.DateTimeFormat('en-CA', {
     year: 'numeric',
     month: '2-digit',
-    day: 'numeric',
+    day: '2-digit',
 });
 
 const d = new Date();

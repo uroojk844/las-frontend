@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { Icon } from '@iconify/vue';
 const { data } = defineProps(['data']);
 </script>
@@ -17,14 +17,14 @@ const { data } = defineProps(['data']);
 @reference "@/style.css";
 
 .card {
-    @apply bg-white hover:bg-secondary cursor-pointer transition-colors p-4 flex justify-between items-center min-w-40 rounded-lg border border-gray-200;
+    @apply bg-surface hover:bg-secondary cursor-pointer p-4 flex justify-between items-center min-w-40 rounded-lg border border-border;
 
     .label {
         @apply text-light-gray text-sm mb-1;
     }
 
     .value {
-        @apply text-2xl font-bold text-black;
+        @apply text-2xl font-bold text-dark-gray;
     }
 
     svg {

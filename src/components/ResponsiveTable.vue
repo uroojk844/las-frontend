@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import Loader from "./Loader.vue";
 
 defineProps({

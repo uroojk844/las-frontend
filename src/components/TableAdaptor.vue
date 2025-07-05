@@ -1,39 +1,29 @@
-<script setup>
+<script setup lang="ts" generic="T, K extends keyof T">
 import { computed, ref } from 'vue';
 import ResponsiveTable from './ResponsiveTable.vue';
-import { containsValue } from '../utils/searchFunctions';
+import { containsValue } from '@/utils/searchFunctions';
 
-const { data, filterBy } = defineProps({
-    title: String,
-    filterBy: String,
-    message: {
-        type: String,
-        default: 'Nothing to show here',
-    },
-    headers: {
-        type: Array,
-        required: true,
-    },
-    data: {
-        type: Array,
-        required: true,
-    },
-    loading: {
-        type: Boolean,
-        default: false,
-    },
-});
+const { data, filterBy, message = 'Nothing to show here',
+    loading = false } =
+    defineProps<{
+        title?: string,
+        filterBy?: K,
+        message?: string;
+        headers: string[],
+        data: T[],
+        loading?: boolean;
+    }>();
 
-const filter = ref('');
-const columnFilter = ref('')
+const filter = ref<string>('');
+const columnFilter = ref<string>('')
 
 const filteredData = computed(() => {
     if (filterBy) {
-        return data.filter(row => columnFilter.value.length ? row[filterBy] == columnFilter.value : row[filterBy]).filter(v => containsValue(v, filter.value))
+        return data.filter(row => columnFilter.value.length ? row[filterBy as keyof T] == columnFilter.value : row[filterBy as keyof T]).filter((v) => containsValue(v as string, filter.value))
     }
-    return data?.filter(v => containsValue(v, filter.value))
+    return data?.filter(v => containsValue(v as string, filter.value))
 })
-const columnFiltered = computed(() => new Set(data.map(d => d[filterBy])));
+const columnFiltered = computed(() => new Set(data.map(d => d[filterBy as keyof typeof d])));
 </script>
 
 <template>

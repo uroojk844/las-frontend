@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import FilledButton from '@/components/FilledButton.vue';
 import MainHeader from '@/components/MainHeader.vue';
 import { computed } from 'vue';
@@ -23,7 +23,7 @@ const user = computed(() => getUsers.value.find(u => u.id == route.params.id));
     </MainHeader>
 
 
-    <section class="grid bg-white p-4 rounded-md">
+    <section class="grid bg-surface p-4 rounded-md">
         <pre>{{ user }}</pre>
     </section>
 </template>

@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import FilledButton from '@/components/FilledButton.vue';
 import { RouterLink } from 'vue-router';
 import { computed, onMounted, ref } from 'vue';
@@ -33,9 +33,9 @@ onMounted(() => {
         </RouterLink>
     </MainHeader>
 
-    <section class="grid bg-white p-4 rounded-md">
-        <TableAdaptor :loading="getIsLoadingUsers" title="Users information" :headers="['User', 'ID', 'Role', 'DOB', 'Mobile', 'Address']"
-            :data="getUsers" filterBy="role">
+    <section class="grid bg-surface p-4 rounded-md">
+        <TableAdaptor :loading="getIsLoadingUsers" title="Users information"
+            :headers="['User', 'ID', 'Role', 'DOB', 'Mobile', 'Address']" :data="getUsers" filterBy="role">
             <template #default="{ data }">
                 <tr v-for="(user, index) in data" :key="index" class="hover:bg-background cursor-pointer"
                     @click="() => $router.push('/admin/view/' + user.id)" title="Click to view details">

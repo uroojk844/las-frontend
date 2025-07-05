@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import FilledButton from '@/components/FilledButton.vue';
 import MainHeader from '@/components/MainHeader.vue';
 import { RouterLink } from 'vue-router';
@@ -8,7 +8,7 @@ import { useStudentsStore } from "@/store/students";
 import { storeToRefs } from 'pinia';
 import TableAdaptor from '@/components/TableAdaptor.vue';
 
-const URL = import.meta.env.API_URL || "https://lasms.proficiosoftware.com";
+const URL = import.meta.env.VITE_API_URL;
 
 const studentsStore = useStudentsStore();
 const { getStudents } = storeToRefs(studentsStore);
@@ -24,13 +24,13 @@ onMounted(() => {
 <template>
     <MainHeader title="Students List">
         <RouterLink to="/student/add">
-            <FilledButton v-if="userStore.getIsAdmin">
+            <FilledButton v-if="userStore.getRole == 'super' || userStore.getRole == 'admin'">
                 <icon icon="ph:plus-bold" /> Add Student
             </FilledButton>
         </RouterLink>
     </MainHeader>
 
-    <section class="grid bg-white p-4 rounded-md">
+    <section class="grid bg-surface p-4 rounded-md">
         <TableAdaptor title="Students information"
             :headers="['Student', 'Enrollment number', 'Class', 'Balance fee', 'DOB', 'Mobile', 'Address']"
             :data="getStudents" filterBy="joiningClass">

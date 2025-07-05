@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue';
 import { useRoute } from 'vue-router';
 
@@ -15,11 +15,15 @@ defineProps({
     }
 });
 
-const preview = ref(null);
+const preview = ref<string | undefined>(undefined);
 
-function createPreview(event) {
-    const url = URL.createObjectURL(event.target.files[0]);
-    preview.value = url;
+function createPreview(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+        const file = input.files[0];
+        const url = URL.createObjectURL(file);
+        preview.value = url;
+    }
 }
 </script>
 
@@ -38,10 +42,10 @@ function createPreview(event) {
 @reference "@/style.css";
 
 .card {
-    @apply block aspect-video border border-gray-200 rounded-md size-full object-cover object-center;
+    @apply block aspect-video border border-border rounded-md size-full object-cover object-center;
 }
 
 .card-placeholder {
-    @apply size-full p-4 text-center place-items-center text-light-gray text-xl cursor-pointer hover:bg-secondary transition-colors border-2 border-dashed border-gray-200 rounded-md absolute top-0 left-0 group-hover:grid bg-white;
+    @apply size-full p-4 text-center place-items-center text-light-gray text-xl cursor-pointer hover:bg-secondary transition-colors border-2 border-dashed border-border rounded-md absolute top-0 left-0 group-hover:grid bg-surface;
 }
 </style>

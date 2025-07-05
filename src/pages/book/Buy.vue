@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { computed, reactive, ref, watch } from "vue"
 import MainHeader from "@/components/MainHeader.vue"
 import InputField from "@/components/InputField.vue"
@@ -11,6 +11,7 @@ import { today } from "@/utils/date";
 import { useBookStore } from "@/store/book";
 import useUserStore from "@/store/user";
 import { storeToRefs } from "pinia";
+import { TBookList } from "@/store/book.interface";
 
 const userStore = useUserStore();
 const { getUser } = storeToRefs(userStore);
@@ -24,14 +25,14 @@ const feeDetails = reactive({
     balance_fee: 0,
 })
 
-const book_list = computed(() => {
+const book_list = computed<TBookList[]>(() => {
     return getClassBooks.value?.book_list ? JSON.parse(getClassBooks.value.book_list) : []
 });
 
 const discount = ref(0)
 const totalAmount = computed(() => {
-    if (book_list.value?.length) {
-        return book_list.value.reduce((acc, cur) => +cur.price + acc, 0)
+    if (book_list.value.length) {
+        return book_list.value.reduce((acc, cur) => +(cur.price as number) + acc, 0)
     } else return 0;
 }
 );
@@ -41,8 +42,8 @@ watch([getClassBooks, book_list], () => {
     feeDetails.amount_paid = totalAmount.value || 0;
 })
 
-function updateBalace(event) {
-    switch (event.target.name) {
+function updateBalace(event: Event) {
+    switch ((event.target as HTMLInputElement).name) {
         case 'amount_paid':
             feeDetails.balance_fee = totalAmount.value - feeDetails.amount_paid;
             break;
@@ -54,7 +55,7 @@ function updateBalace(event) {
     }
 }
 
-function submitBookFee(event) {
+function submitBookFee(event: Event) {
     let fee_data = {
         fee_type_id: 9,
         amount_paid: feeDetails.amount_paid,
@@ -69,7 +70,7 @@ function submitBookFee(event) {
         <InputField type="date" v-model="today" />
     </MainHeader>
 
-    <section class="bg-white p-4 rounded-md grid gap-4 mb-4">
+    <section class="bg-surface p-4 rounded-md grid gap-4 mb-4">
         <form @submit.prevent="bookStore.fetchClassBooks" class="flex items-end gap-4">
             <InputField label="Enrollment number" name="enrollment" placeholder="Enter 8 digit enrollment" />
             <FilledButton :isLoading="getIsLoadingClassBooks">Search student</FilledButton>
@@ -77,7 +78,7 @@ function submitBookFee(event) {
     </section>
 
     <div v-if="getClassBooks" class="contents">
-        <section class="bg-white p-4 rounded-md grid-responsive">
+        <section class="bg-surface p-4 rounded-md grid-responsive">
             <InputField label="Class" v-model="getClassBooks.class_name" disabled :required="false" />
             <TableAdaptor title="Book list" class="col-span-full" :headers="['Book name', 'Price', 'Action']"
                 :data="book_list" :loading="getIsLoadingClassBooks">
@@ -94,10 +95,10 @@ function submitBookFee(event) {
                 </template>
             </TableAdaptor>
         </section>
-        <MainHeader title="Enter fee details" class="mt-4" />
-        <section class="bg-white p-4 rounded-md grid gap-4">
+        <MainHeader title="Enter payment details" class="mt-4" />
+        <section class="bg-surface p-4 rounded-md grid gap-4">
             <form @submit.prevent="submitBookFee" class="grid-responsive">
-                <input type="hidden" name="collected_by" :value="getUser.id" required />
+                <input type="hidden" name="collected_by" :value="getUser?.id" required />
                 <input type="hidden" name="student_id" :value="getClassBooks.student_id" required />
 
                 <InputField type="number" label="Total amount to pay" v-model="totalAmount" disabled />
@@ -105,7 +106,7 @@ function submitBookFee(event) {
                     :required="false" />
                 <InputField label="Transaction ID" name="transaction_id"
                     :required="feeDetails.payment_mode != 'cash'" />
-                <InputField label="Select date" name="payment_date" type="date" v-model="today" />
+                <InputField label="Select date" name="payment_date" type="date" :value="today" />
                 <RadioGroup label="Payment mode" name="payment_method" class="col-span-full"
                     v-model="feeDetails.payment_mode" :values="[
                         {
@@ -134,7 +135,7 @@ function submitBookFee(event) {
                     <TextField label="Notes" :rows="2" name="notes" :required="false"></TextField>
                 </div>
 
-                <hr class="col-span-full border-dashed h-1 border-gray-200" />
+                <hr class="col-span-full border-dashed h-1 border-border" />
 
                 <div class="space-y-1 col-span-2 col-start-2">
                     <p class="flex justify-between items-center w-full">
@@ -164,7 +165,7 @@ function submitBookFee(event) {
                     </p>
                 </div>
 
-                <hr class="col-span-full border-dashed h-1 border-gray-200" />
+                <hr class="col-span-full border-dashed h-1 border-border" />
 
                 <div class="col-span-full">
                     <FilledButton :isLoading="getIsSubmittingBookFee">Submit</FilledButton>

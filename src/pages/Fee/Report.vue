@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import MainHeader from "@/components/MainHeader.vue"
 import InputField from "@/components/InputField.vue"
 import FilledButton from "@/components/FilledButton.vue"
@@ -44,7 +44,7 @@ onMounted(() => {
         <InputField type="date" disable v-model="today" />
     </MainHeader>
 
-    <section class="bg-white p-4 rounded-md grid gap-4 mb-4">
+    <section class="bg-surface p-4 rounded-md grid gap-4 mb-4">
         <form @submit.prevent="feeStore.fetchReport" class="flex items-end gap-4">
             <SelectField label="Select Class" name="joiningClass" v-model="joiningClass" position="bottom"
                 :options="classListOption" />
@@ -52,7 +52,7 @@ onMounted(() => {
         </form>
     </section>
 
-    <section class="bg-white p-4 rounded-md grid gap-4">
+    <section class="bg-surface p-4 rounded-md grid gap-4">
         <TableAdaptor title="Previous fee details"
             :headers="['Name', 'Balance Amount', 'Father name', 'Phone', 'Address', 'Collected by', 'Notes']"
             :data="getStudentList" message="Search student to see previous fee details" :loading="getIsSearching">

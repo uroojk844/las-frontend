@@ -2,25 +2,35 @@
 @import "tailwindcss";
 
 @theme {
+    --color-surface: #fff;
     --color-primary: #7c4994;
     --color-accent: #965fb0;
     --color-secondary: #f9f1fe;
     --color-background: #fafafa;
     --color-dark-gray: #333333;
-    --color-light-gray: #a4a5a4;
+    --color-light-gray: #a4a5a4;   
+    --color-border:#ebe6e7; 
 }
 
 body {
     font-family: Inter, sans-serif;
     background-color: var(--color-background);
-    color: var(--color-dark-gray)
+    color: var(--color-dark-gray);
+    
+    &.dark {
+        --color-dark-gray: #bfbfbf;
+        --color-surface: #21222a;
+        --color-background: #282931;
+        --color-border: #373737;
+        --color-secondary: #282931;
+    }
 }
 
 .router-link-exact-active {
     @apply text-accent bg-secondary;
 }
 
-a,button,input,textarea, select {
+a,button,input,textarea,select {
     @apply outline-0;
 }
 

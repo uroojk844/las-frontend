@@ -1,22 +1,14 @@
-<script setup>
-defineProps({
-    type: {
-        type: String,
-        default: "primary"
-    },
-    size: {
-        type: String,
-        default: "md"
-    },
-    isLoading: {
-        type: Boolean,
-        default: false
-    }
-});
+<script setup lang="ts">
+const { type = 'primary', size = 'md', isLoading = false } = defineProps<{
+    type?: "primary" | "danger" | "success" | "disabled",
+    size?: 'sm' | 'md',
+    isLoading?: boolean;
+}>();
 </script>
 
 <template>
-    <button class="flex items-center gap-2 justify-center whitespace-nowrap disabled:bg-light-gray text-white hover:brightness-110"
+    <button
+        class="flex items-center gap-2 justify-center whitespace-nowrap disabled:bg-light-gray text-white hover:brightness-110"
         :class="{
             'bg-primary': type === 'primary',
             'bg-red-400': type === 'danger',
@@ -25,7 +17,9 @@ defineProps({
             'py-2 px-5 rounded-md': size === 'md',
             'py-1 px-3 rounded': size === 'sm',
         }" :disabled="type === 'disabled' || isLoading">
-        <span v-if="isLoading" class="py-1"><icon icon="svg-spinners:ring-resize" /></span>
+        <span v-if="isLoading" class="py-1">
+            <icon icon="svg-spinners:ring-resize" />
+        </span>
         <slot v-else></slot>
     </button>
 </template>

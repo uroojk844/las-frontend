@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import MainHeader from '@/components/MainHeader.vue';
 import InputField from '@/components/InputField.vue';
 import FilledButton from '@/components/FilledButton.vue';
@@ -20,7 +20,7 @@ const { getPreviousSchool, classListOption, getStudentEnrolloment } = storeToRef
 const feeStore = useFeeStore();
 const { getFeeTypes } = storeToRefs(feeStore);
 
-const fee_type_id = ref([1, 2]);
+const fee_type_id = ref<number[]>([1, 2]);
 
 const options = computed(() => getFeeTypes.value.map((fee) => {
     return {
@@ -54,7 +54,7 @@ onMounted(() => {
     <MainHeader title="Add Student"></MainHeader>
 
     <form @submit.prevent="studentsStore.addStudent($event, fee_type_id)"
-        class="bg-white p-4 rounded-md grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+        class="bg-surface p-4 rounded-md grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
 
         <div class="col-span-full font-medium text-light-gray -mb-2">Student details</div>
 
@@ -145,14 +145,14 @@ onMounted(() => {
 @reference "@/style.css";
 
 .card {
-    @apply block aspect-video border border-gray-200 rounded-md size-full object-cover object-center;
+    @apply block aspect-video border border-border rounded-md size-full object-cover object-center;
 }
 
 .card-placeholder {
-    @apply grid place-items-center text-light-gray text-xl cursor-pointer hover:bg-secondary transition-colors aspect-video border-2 border-dashed border-gray-200 rounded-md;
+    @apply grid place-items-center text-light-gray text-xl cursor-pointer hover:bg-secondary transition-colors aspect-video border-2 border-dashed border-border rounded-md;
 }
 
 .photo-placeholder {
-    @apply size-full grid place-items-center text-center text-light-gray text-xl cursor-pointer hover:bg-secondary transition-colors border-2 border-dashed border-gray-200 rounded-md;
+    @apply size-full grid place-items-center text-center text-light-gray text-xl cursor-pointer hover:bg-secondary transition-colors border-2 border-dashed border-border rounded-md;
 }
 </style>

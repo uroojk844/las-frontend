@@ -1,40 +1,29 @@
-<script setup>
+<script setup lang="ts">
 import { onMounted } from 'vue';
 
-const { selected } = defineProps({
-    label: {
-        type: String,
-        required: true,
+const { selected, fixHeight = true, values = [
+    {
+        label: 'Male',
+        value: 'm',
     },
-    name: {
-        type: String,
-        required: true,
+    {
+        label: 'Female',
+        value: 'f',
     },
-    values: {
-        type: Array,
-        default: () => [
-            {
-                label: 'Male',
-                value: 'm',
-            },
-            {
-                label: 'Female',
-                value: 'f',
-            },
-        ],
-    },
-    selected: String,
-    fixHeight: {
-        type: Boolean,
-        default: true,
-    },
-    disabled: {
-        type: Boolean,
-        default: false,
-    }
-})
+] } = defineProps<{
+    label: string,
+    name: string,
+    values?: {
+        label: string,
+        value: string | number;
+    }[],
+    selected?: string,
+    fixHeight?: boolean,
+    disabled?: boolean
+}
+>();
 
-const modelValue = defineModel({ default: 'm' });
+const modelValue = defineModel<string | number>({ default: 'm' });
 
 onMounted(() => {
     if (selected) modelValue.value = selected;
@@ -43,7 +32,8 @@ onMounted(() => {
 
 <template>
     <section>
-        <div class="block text-sm font-medium">{{ label }}<span class="text-red-400 ml-0.5">*</span></div>
+        <div class="block text-sm font-medium text-dark-gray">{{ label }}<span class="text-red-400 ml-0.5">*</span>
+        </div>
         <div class="flex mt-1 items-center" :class="{ 'h-10': fixHeight, 'gap-8': !disabled }">
             <section v-for="(input, index) in values" :key="index" class="flex items-center gap-2 accent-accent">
                 <label :for="input.label" class="text-sm" :class="{ 'text-gray-500': disabled }"
